@@ -6,21 +6,28 @@ interface VisaSupportStepProps {
   onBack: () => void;
   onClose: () => void;
   foundWithMigrateMate: 'yes' | 'no' | null;
+  onCompleted?: (variant: 'yes' | 'no') => void;
 }
 
-export function VisaSupportStep({ onBack, onClose, foundWithMigrateMate }: VisaSupportStepProps) {
+export function VisaSupportStep({ onBack, onClose, foundWithMigrateMate, onCompleted }: VisaSupportStepProps) {
   const [hasLawyer, setHasLawyer] = useState<'' | 'yes' | 'no'>('');
   const [visaType, setVisaType] = useState<string>('');
-  // Require visa type when:
-  //  - user selects No lawyer, OR
-  //  - user selects Yes lawyer but earlier answered they did not find via MigrateMate
-  const needsVisaType = hasLawyer === 'no' || (hasLawyer === 'yes' && foundWithMigrateMate === 'no');
+  // Require visa type whenever a choice is made in Step 3 (Yes or No).
+  // This covers both flows:
+  //  - Step1: No → Step3: Yes (input required)
+  //  - Step1: Yes → Step3: Yes (input required, per latest mock)
+  //  - Step3: No (input required for partner handoff)
+  const needsVisaType = hasLawyer !== '';
   const canComplete = hasLawyer === '' ? false : needsVisaType ? visaType.trim().length > 0 : true;
 
   const handleComplete = () => {
     if (!canComplete) return;
     console.log('Visa support selection:', { hasLawyer, visaType: visaType.trim() });
-    // For now, close the modal. Hook this to a cancellation handler if needed.
+    // Flow branching to Completed screen for both options; variant decides the copy.
+    if (onCompleted) {
+      onCompleted(hasLawyer === 'no' ? 'no' : 'yes');
+      return;
+    }
     onClose();
   };
 

@@ -3,16 +3,16 @@
 interface CancellationStep1Props {
   onClose: () => void;
   onJobFound: () => void;
+  onStillLooking: () => void;
 }
 
-export function CancellationStep1({ onClose, onJobFound }: CancellationStep1Props) {
+export function CancellationStep1({ onClose, onJobFound, onStillLooking }: CancellationStep1Props) {
   const handleJobFoundClick = () => {
     onJobFound();
   };
 
   const handleStillLookingClick = () => {
-    // Handle "Not yet - I'm still looking" click  
-    console.log('Still looking clicked');
+    onStillLooking();
   };
 
   return (

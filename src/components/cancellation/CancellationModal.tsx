@@ -5,6 +5,10 @@ import { CancellationStep1 } from './steps/CancellationStep1';
 import { CongratulationsStep } from './steps/CongratulationsStep';
 import { FeedbackStep } from './steps/FeedbackStep';
 import { VisaSupportStep } from './steps/VisaSupportStep';
+import { CompletedStep } from './steps/CompletedStep';
+import { OfferStep } from './steps/OfferStep';
+import { OfferAcceptedStep } from './steps/OfferAcceptedStep';
+import { JobSuggestionsStep } from './steps/JobSuggestionsStep';
 
 export interface CancellationModalProps {
   isOpen: boolean;
@@ -12,8 +16,9 @@ export interface CancellationModalProps {
 }
 
 export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
-  const [currentStep, setCurrentStep] = useState<'initial' | 'congratulations' | 'feedback' | 'visa'>('initial');
+  const [currentStep, setCurrentStep] = useState<'initial' | 'offer' | 'offerAccepted' | 'jobSuggestions' | 'congratulations' | 'feedback' | 'visa' | 'completed'>('initial');
   const [foundWithMigrateMate, setFoundWithMigrateMate] = useState<null | 'yes' | 'no'>(null);
+  const [completedVariant, setCompletedVariant] = useState<'yes' | 'no'>('no');
 
   const handleJobFound = () => {
     setCurrentStep('congratulations');
@@ -22,6 +27,9 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
   const handleBack = () => {
     // Go back one step
     setCurrentStep((prev) => {
+      if (prev === 'jobSuggestions') return 'offerAccepted';
+      if (prev === 'offerAccepted') return 'offer';
+      if (prev === 'completed') return 'visa';
       if (prev === 'visa') return 'feedback';
       if (prev === 'feedback') return 'congratulations';
       return 'initial';
@@ -43,7 +51,28 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
         
         <div className="relative bg-white rounded-xl shadow-xl max-w-4xl w-full mx-4 transform transition-all">
           {currentStep === 'initial' && (
-            <CancellationStep1 onClose={handleClose} onJobFound={handleJobFound} />
+            <CancellationStep1
+              onClose={handleClose}
+              onJobFound={handleJobFound}
+              onStillLooking={() => setCurrentStep('offer')}
+            />
+          )}
+
+          {currentStep === 'offer' && (
+            <OfferStep
+              onBack={() => setCurrentStep('initial')}
+              onClose={handleClose}
+              onAccept={() => setCurrentStep('offerAccepted')}
+              onDecline={() => setCurrentStep('congratulations')}
+            />
+          )}
+
+          {currentStep === 'offerAccepted' && (
+            <OfferAcceptedStep onBack={() => setCurrentStep('offer')} onClose={handleClose} onContinue={() => setCurrentStep('jobSuggestions')} />
+          )}
+
+          {currentStep === 'jobSuggestions' && (
+            <JobSuggestionsStep onBack={() => setCurrentStep('offerAccepted')} onClose={handleClose} />
           )}
           
           {currentStep === 'congratulations' && (
@@ -69,7 +98,19 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
           )}
 
           {currentStep === 'visa' && (
-            <VisaSupportStep foundWithMigrateMate={foundWithMigrateMate} onBack={handleBack} onClose={handleClose} />
+            <VisaSupportStep
+              foundWithMigrateMate={foundWithMigrateMate}
+              onBack={handleBack}
+              onClose={handleClose}
+              onCompleted={(variant) => {
+                setCompletedVariant(variant);
+                setCurrentStep('completed');
+              }}
+            />
+          )}
+
+          {currentStep === 'completed' && (
+            <CompletedStep variant={completedVariant} onBack={handleBack} onClose={handleClose} />
           )}
         </div>
       </div>
