@@ -5,6 +5,7 @@ import { CancellationStep1 } from './steps/CancellationStep1';
 import { CongratulationsStep } from './steps/CongratulationsStep';
 import { FeedbackStep } from './steps/FeedbackStep';
 import { VisaSupportStep } from './steps/VisaSupportStep';
+import { ReasonStep } from './steps/ReasonStep';
 import { CompletedStep } from './steps/CompletedStep';
 import { OfferStep } from './steps/OfferStep';
 import { OfferAcceptedStep } from './steps/OfferAcceptedStep';
@@ -16,7 +17,7 @@ export interface CancellationModalProps {
 }
 
 export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
-  const [currentStep, setCurrentStep] = useState<'initial' | 'offer' | 'offerAccepted' | 'jobSuggestions' | 'congratulations' | 'feedback' | 'visa' | 'completed'>('initial');
+  const [currentStep, setCurrentStep] = useState<'initial' | 'offer' | 'offerAccepted' | 'jobSuggestions' | 'congratulations' | 'feedback' | 'reason' | 'visa' | 'completed'>('initial');
   const [foundWithMigrateMate, setFoundWithMigrateMate] = useState<null | 'yes' | 'no'>(null);
   const [completedVariant, setCompletedVariant] = useState<'yes' | 'no'>('no');
 
@@ -29,9 +30,11 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
     setCurrentStep((prev) => {
       if (prev === 'jobSuggestions') return 'offerAccepted';
       if (prev === 'offerAccepted') return 'offer';
-      if (prev === 'completed') return 'visa';
+      if (prev === 'completed') return 'reason';
+      if (prev === 'reason') return 'feedback';
       if (prev === 'visa') return 'feedback';
-      if (prev === 'feedback') return 'congratulations';
+      // If feedback was reached after declining offer, foundWithMigrateMate will be null -> go back to offer
+      if (prev === 'feedback') return foundWithMigrateMate === null ? 'offer' : 'congratulations';
       return 'initial';
     });
   };
@@ -63,7 +66,7 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
               onBack={() => setCurrentStep('initial')}
               onClose={handleClose}
               onAccept={() => setCurrentStep('offerAccepted')}
-              onDecline={() => setCurrentStep('congratulations')}
+              onDecline={() => setCurrentStep('feedback')}
             />
           )}
 
@@ -91,9 +94,17 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
               onBack={handleBack}
               onClose={handleClose}
               onContinue={() => {
-                // After feedback, always show the visa step. Copy varies by foundWithMigrateMate.
-                setCurrentStep('visa');
+                // After feedback, ask for main reason (Step 3), then proceed to visa.
+                setCurrentStep('reason');
               }}
+            />
+          )}
+
+          {currentStep === 'reason' && (
+            <ReasonStep
+              onBack={handleBack}
+              onClose={handleClose}
+              onContinue={() => setCurrentStep('completed')}
             />
           )}
 

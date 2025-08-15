@@ -26,7 +26,16 @@ export function JobSuggestionsStep({ onBack, onClose }: JobSuggestionsStepProps)
         </button>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-4 md:gap-6 p-4 md:p-6">
+      {/* Mobile top image */}
+      <div className="md:hidden px-4 pt-4">
+        <img
+          src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+          alt="New York City skyline"
+          className="w-full h-40 object-cover rounded-lg"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6 px-4 md:px-6 py-4 md:py-6 pb-20 md:pb-6">
         {/* Right image on desktop */}
         <div className="hidden md:block md:order-2">
           <img
@@ -44,7 +53,7 @@ export function JobSuggestionsStep({ onBack, onClose }: JobSuggestionsStepProps)
           <p className="mt-2 text-sm md:text-base text-gray-600">Take a look and see what sparks your interest.</p>
 
           {/* Job card mock */}
-          <div className="mt-4 rounded-xl border border-gray-200 shadow-sm p-4 bg-white">
+          <div className="mt-4 rounded-xl border border-gray-200 shadow-sm p-4 bg-white overflow-hidden">
             <div className="flex items-start">
               <div className="mr-3">
                 <div className="w-10 h-10 rounded-md bg-indigo-100 text-indigo-600 flex items-center justify-center font-semibold">JM</div>
@@ -92,12 +101,19 @@ export function JobSuggestionsStep({ onBack, onClose }: JobSuggestionsStepProps)
           </div>
 
           {/* Footer CTA */}
-          <div className="mt-6">
-            <button onClick={onClose} className="w-full md:w-auto px-5 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-sm">
+          <div className="mt-6 hidden md:block">
+            <button onClick={onClose} className="px-5 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-sm">
               Land your dream role
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Mobile sticky CTA */}
+      <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white px-4 pb-4 pt-3 border-t">
+        <button onClick={onClose} className="w-full px-5 py-3 rounded-lg bg-purple-600 hover:bg-purple-700 text-white font-semibold shadow-sm">
+          Land your dream role
+        </button>
       </div>
     </div>
   );

@@ -75,15 +75,17 @@ export function OfferStep({ onBack, onClose, onAccept, onDecline }: OfferStepPro
 
         {/* Left content */}
         <div className="flex-1 md:order-1">
-          <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight">
+          <h3 className="text-xl md:text-2xl font-extrabold text-gray-900 leading-snug break-words">
             We built this to help you land the job, this makes it a little easier.
           </h3>
-          <p className="text-gray-700 mt-2 mb-4">We’ve been there and we’re here to help you.</p>
+          <p className="text-gray-700 mt-2 mb-4 text-sm md:text-base">We’ve been there and we’re here to help you.</p>
 
           {/* Offer card */}
           <div className="rounded-xl border border-purple-300 bg-purple-100 p-4 md:p-5 shadow-sm mb-4">
             <div className="text-center">
-              <div className="text-lg md:text-xl font-semibold text-gray-900">Here’s 50% off until you find a job.</div>
+              <div className="text-lg md:text-xl font-extrabold text-gray-900 leading-snug">
+                Here’s <span className="underline">50% off</span> until you find a job.
+              </div>
               <div className="mt-1">
                 <span className="text-indigo-700 text-xl md:text-2xl font-bold">$12.50</span>
                 <span className="text-indigo-700">/month</span>

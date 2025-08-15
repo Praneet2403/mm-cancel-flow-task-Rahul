@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 interface FeedbackStepProps {
   onBack: () => void;
@@ -9,17 +9,30 @@ interface FeedbackStepProps {
 }
 
 export function FeedbackStep({ onBack, onClose, onContinue }: FeedbackStepProps) {
-  const [feedback, setFeedback] = useState<string>('');
+  // Three multiple-choice responses
+  const roleAppliedOptions = ['0', '1 - 5', '6 - 20', '20+'];
+  const emailedOptions = ['0', '1-5', '6-20', '20+'];
+  const interviewedOptions = ['0', '1-2', '3-5', '5+'];
 
-  const minChars = 25;
-  const canContinue = feedback.trim().length >= minChars;
+  const [applied, setApplied] = useState<string | null>(null);
+  const [emailed, setEmailed] = useState<string | null>(null);
+  const [interviewed, setInterviewed] = useState<string | null>(null);
+
+  const canContinue = Boolean(applied && emailed && interviewed);
+  const [showError, setShowError] = useState(false);
 
   const handleContinue = () => {
-    if (!canContinue) return;
-    console.log('Feedback submitted:', feedback.trim());
-    // Defer navigation decision to parent
+    if (!canContinue) {
+      setShowError(true);
+      return;
+    }
     onContinue();
   };
+
+  // Clear error once all answers are filled
+  useEffect(() => {
+    if (canContinue && showError) setShowError(false);
+  }, [canContinue, showError]);
 
   return (
     <div className="relative">
@@ -39,7 +52,7 @@ export function FeedbackStep({ onBack, onClose, onContinue }: FeedbackStepProps)
           {/* Progress row */}
           <div className="flex items-center space-x-2 mt-2">
             <div className="w-2 h-2 bg-green-500 rounded-full"></div>
-            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+            <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
             <div className="w-2 h-2 bg-gray-300 rounded-full"></div>
             <span className="text-sm text-gray-500 ml-2">Step 2 of 3</span>
           </div>
@@ -64,8 +77,8 @@ export function FeedbackStep({ onBack, onClose, onContinue }: FeedbackStepProps)
           <div className="flex items-center space-x-2">
             <span className="text-sm font-medium text-gray-900">Subscription Cancellation</span>
             <div className="flex space-x-1">
-              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
               <div className="w-2 h-2 bg-gray-400 rounded-full"></div>
             </div>
             <span className="text-sm text-gray-500">Step 2 of 3</span>
@@ -80,9 +93,18 @@ export function FeedbackStep({ onBack, onClose, onContinue }: FeedbackStepProps)
       </div>
 
       {/* Content */}
-      <div className="flex flex-col md:flex-row">
+      {/* Mobile top image */}
+      <div className="md:hidden px-4 pt-4">
+        <img
+          src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
+          alt="New York City skyline"
+          className="w-full h-40 object-cover rounded-lg"
+        />
+      </div>
+
+      <div className="grid md:grid-cols-2 gap-4 md:gap-6 px-4 md:px-6 py-4 md:py-6">
         {/* Right image on desktop */}
-        <div className="hidden md:block md:w-80 md:h-96 md:flex-shrink-0 md:order-2">
+        <div className="hidden md:block md:order-2">
           <img
             src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1000&q=80"
             alt="New York City skyline"
@@ -90,42 +112,105 @@ export function FeedbackStep({ onBack, onClose, onContinue }: FeedbackStepProps)
           />
         </div>
 
-        {/* Left form on desktop */}
-        <div className="flex-1 p-4 md:p-6 md:order-1">
-          <h3 className="text-2xl font-bold text-gray-900 mb-2">
-            What's one thing you wish we could've helped you with?
-          </h3>
-          <div className="border-t border-gray-200 mb-3" />
-          <p className="text-sm text-gray-600 mb-4">
-            We're always looking to improve, your thoughts can help us make Migrate Mate more useful for others.*
-          </p>
+        {/* Left questions */
+        }
+        <div className="flex flex-col md:order-1">
+          <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-snug break-words">What’s the main reason for cancelling?</h3>
 
-          <div className="relative">
-            <textarea
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-              placeholder="Share your thoughts..."
-              rows={6}
-              className="w-full p-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-200"
-            />
-            <div className="text-xs text-gray-500 mt-2 text-right">Min 25 characters ({feedback.trim().length}/{minChars})</div>
+          {showError && !canContinue && (
+            <div className="mt-2 text-sm text-red-600">
+              <p>Mind letting us know why you’re cancelling?</p>
+              <p className="mt-0.5">It helps us understand your experience and improve the platform.<span className="align-super">*</span></p>
+            </div>
+          )}
+
+          <div className="mt-4 space-y-5">
+            {/* Q1 */}
+            <div>
+              <p className="text-sm text-gray-700 mb-2">How many roles did you apply for through Migrate Mate?</p>
+              <div className="grid grid-cols-4 gap-2">
+                {roleAppliedOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setApplied(opt)}
+                    aria-pressed={applied === opt}
+                    className={`h-10 rounded-md text-sm font-medium border ${applied === opt ? 'bg-purple-500 text-white border-purple-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Q2 */}
+            <div>
+              <p className="text-sm text-gray-700 mb-2">How many companies did you email directly?</p>
+              <div className="grid grid-cols-4 gap-2">
+                {emailedOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setEmailed(opt)}
+                    aria-pressed={emailed === opt}
+                    className={`h-10 rounded-md text-sm font-medium border ${emailed === opt ? 'bg-purple-500 text-white border-purple-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* Q3 */}
+            <div>
+              <p className="text-sm text-gray-700 mb-2">How many different companies did you interview with?</p>
+              <div className="grid grid-cols-4 gap-2">
+                {interviewedOptions.map((opt) => (
+                  <button
+                    key={opt}
+                    onClick={() => setInterviewed(opt)}
+                    aria-pressed={interviewed === opt}
+                    className={`h-10 rounded-md text-sm font-medium border ${interviewed === opt ? 'bg-purple-500 text-white border-purple-500' : 'bg-gray-100 text-gray-700 border-gray-200 hover:bg-gray-200'}`}
+                  >
+                    {opt}
+                  </button>
+                ))}
+              </div>
+            </div>
           </div>
 
-          {/* Continue Button */}
-          <div className="mt-8">
+          {/* Desktop CTAs inline */}
+          <div className="hidden md:block mt-5">
+            {/* Green 50% off CTA */}
+            <button
+              onClick={onBack}
+              className="w-full h-11 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold"
+            >
+              Get 50% off | $12.50 <span className="opacity-75 line-through ml-1">$25</span>
+            </button>
+            {/* Continue Button */}
             <button
               onClick={handleContinue}
-              disabled={!canContinue}
-              className={`w-full px-4 py-3 text-sm font-medium rounded-lg transition-colors ${
-                canContinue
-                  ? 'bg-gray-200 text-gray-800 hover:bg-gray-300'
-                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
-              }`}
+              className={`mt-3 w-full h-11 rounded-lg font-semibold ${canContinue ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-gray-100 text-gray-500 hover:bg-gray-100'}`}
             >
-              Continue
+              Complete cancellation
             </button>
           </div>
         </div>
+      </div>
+
+      {/* Sticky mobile footer CTAs */}
+      <div className="md:hidden sticky bottom-0 left-0 right-0 bg-white border-t border-gray-200 px-4 pt-3 pb-4">
+        <button
+          onClick={onBack}
+          className="w-full h-11 rounded-lg bg-green-600 hover:bg-green-700 text-white font-semibold"
+        >
+          Get 50% off | $12.50 <span className="opacity-75 line-through ml-1">$25</span>
+        </button>
+        <button
+          onClick={handleContinue}
+          className={`mt-3 w-full h-11 rounded-lg font-semibold ${canContinue ? 'bg-red-600 text-white hover:bg-red-700' : 'bg-gray-100 text-gray-500'}`}
+        >
+          Complete cancellation
+        </button>
       </div>
     </div>
   );

@@ -75,58 +75,49 @@ export function CompletedStep({ onBack, onClose, variant = 'no' }: CompletedStep
         {/* Left content */}
         <div className="flex-1 md:order-1">
           {variant === 'yes' ? (
-            <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-3 md:mb-4">
-              All done, your cancellation’s
-              <br className="hidden md:block" /> been processed.
-            </h3>
-          ) : (
-            <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-3 md:mb-4 px-0 md:px-0">
-              Your cancellation’s all sorted, mate,
-              <br className="hidden md:block" /> no more charges.
-            </h3>
-          )}
-
-          {/* Body / message */}
-          {variant === 'yes' ? (
-            <div className="mb-6 text-sm text-gray-700">
-              <p>We’re stoked to hear you’ve landed a job and sorted your visa.</p>
-              <p className="mt-2">Big congrats from the team. 🙌</p>
-            </div>
-          ) : (
-            <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 md:p-5 shadow-sm mb-6">
-              <div className="flex items-start">
-                <img
-                  src="https://images.unsplash.com/photo-1502685104226-ee32379fefbe?auto=format&fit=crop&w=64&q=60"
-                  alt="Agent avatar"
-                  className="w-10 h-10 rounded-full mr-3 object-cover"
-                />
-                <div className="flex-1">
-                  <div className="text-sm font-semibold text-gray-900">Mihailo Bozic</div>
-                  <div className="text-xs text-gray-500">mihailo@migratemate.co</div>
-                  <p className="text-sm text-gray-700 mt-3">
-                    I’ll be reaching out soon to help with the visa side of things.
-                  </p>
-                  <p className="text-sm text-gray-700 mt-2">
-                    We’ve got your back, whether it’s questions, paperwork, or just
-                    figuring out your options.
-                  </p>
-                  <p className="text-sm text-gray-700 mt-2">
-                    Keep an eye on your inbox, I’ll be in touch shortly.
-                  </p>
-                </div>
+            <>
+              <h3 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-3 md:mb-4">
+                All done, your cancellation’s
+                <br className="hidden md:block" /> been processed.
+              </h3>
+              <div className="mb-6 text-sm text-gray-700">
+                <p>We’re stoked to hear you’ve landed a job and sorted your visa.</p>
+                <p className="mt-2">Big congrats from the team. 🙌</p>
               </div>
-            </div>
+              {/* Finish CTA (desktop) */}
+              <div className="hidden md:block border-t border-gray-200 pt-4">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-3 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-semibold transition-colors"
+                >
+                  Finish
+                </button>
+              </div>
+            </>
+          ) : (
+            <>
+              <h2 className="text-2xl md:text-3xl font-extrabold text-gray-900 leading-tight mb-3 md:mb-4">
+                Sorry to see you go, mate.
+              </h2>
+              <h3 className="text-lg md:text-xl font-semibold text-gray-900 mb-3 md:mb-4">
+                Thanks for being with us, and you’re always welcome back.
+              </h3>
+              <div className="text-sm text-gray-700 space-y-2 mb-6">
+                <p>Your subscription is set to end on XX date.</p>
+                <p>You’ll still have full access until then. No further charges after that.</p>
+                <p className="mt-2">Changed your mind? You can reactivate anytime before your end date.</p>
+              </div>
+              {/* Desktop CTA (Back to Jobs) */}
+              <div className="hidden md:block border-t border-gray-200 pt-4">
+                <button
+                  onClick={onClose}
+                  className="px-6 py-3 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-semibold transition-colors"
+                >
+                  Back to Jobs
+                </button>
+              </div>
+            </>
           )}
-
-          {/* Finish CTA (desktop) */}
-          <div className="hidden md:block border-t border-gray-200 pt-4">
-            <button
-              onClick={onClose}
-              className="px-6 py-3 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-semibold transition-colors"
-            >
-              Finish
-            </button>
-          </div>
         </div>
       </div>
 
@@ -136,7 +127,7 @@ export function CompletedStep({ onBack, onClose, variant = 'no' }: CompletedStep
           onClick={onClose}
           className="w-full h-12 rounded-lg bg-purple-500 hover:bg-purple-600 text-white font-semibold transition-colors"
         >
-          Finish
+          {variant === 'yes' ? 'Finish' : 'Back to Jobs'}
         </button>
       </div>
     </div>
