@@ -5,9 +5,10 @@ import { useState } from 'react';
 interface CongratulationsStepProps {
   onBack: () => void;
   onClose: () => void;
+  onContinue: (foundWithMigrateMate: 'yes' | 'no') => void;
 }
 
-export function CongratulationsStep({ onBack, onClose }: CongratulationsStepProps) {
+export function CongratulationsStep({ onBack, onClose, onContinue }: CongratulationsStepProps) {
   const [foundWithMigrateMate, setFoundWithMigrateMate] = useState<string>('');
   const [rolesApplied, setRolesApplied] = useState<string>('');
   const [companiesEmailed, setCompaniesEmailed] = useState<string>('');
@@ -21,7 +22,8 @@ export function CongratulationsStep({ onBack, onClose }: CongratulationsStepProp
       companiesEmailed,
       companiesInterviewed
     });
-    onClose();
+    // Move to next step (feedback) and bubble up whether job was found with MigrateMate
+    onContinue(foundWithMigrateMate as 'yes' | 'no');
   };
 
   const canContinue = foundWithMigrateMate && rolesApplied && companiesEmailed && companiesInterviewed;
@@ -230,3 +232,4 @@ export function CongratulationsStep({ onBack, onClose }: CongratulationsStepProp
     </div>
   );
 }
+
