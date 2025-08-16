@@ -17,6 +17,7 @@ CREATE TABLE IF NOT EXISTS subscriptions (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   monthly_price INTEGER NOT NULL, -- Price in USD cents
   status TEXT NOT NULL DEFAULT 'active' CHECK (status IN ('active', 'pending_cancellation', 'cancelled')),
+  cancel_at TIMESTAMP WITH TIME ZONE,
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
   updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
@@ -27,8 +28,11 @@ CREATE TABLE IF NOT EXISTS cancellations (
   user_id UUID REFERENCES users(id) ON DELETE CASCADE,
   subscription_id UUID REFERENCES subscriptions(id) ON DELETE CASCADE,
   downsell_variant TEXT NOT NULL CHECK (downsell_variant IN ('A', 'B')),
-  reason TEXT,
   accepted_downsell BOOLEAN DEFAULT FALSE,
+  reason TEXT,
+  reason_detail TEXT CHECK (reason_detail IS NULL OR char_length(reason_detail) >= 25),
+  price_input_cents INTEGER CHECK (price_input_cents IS NULL OR (price_input_cents >= 0 AND price_input_cents <= 100000)),
+  status TEXT NOT NULL DEFAULT 'in_progress' CHECK (status IN ('in_progress','completed')),
   created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
 );
 
@@ -52,6 +56,14 @@ CREATE POLICY "Users can insert own cancellations" ON cancellations
 
 CREATE POLICY "Users can view own cancellations" ON cancellations
   FOR SELECT USING (auth.uid() = user_id);
+
+CREATE POLICY "Users can update own cancellations" ON cancellations
+  FOR UPDATE USING (auth.uid() = user_id);
+
+-- Ensure only one in_progress cancellation per user
+CREATE UNIQUE INDEX IF NOT EXISTS idx_cancellations_user_inprogress
+ON cancellations (user_id)
+WHERE status = 'in_progress';
 
 -- Seed data
 INSERT INTO users (id, email) VALUES

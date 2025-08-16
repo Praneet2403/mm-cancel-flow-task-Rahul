@@ -34,10 +34,30 @@ export function ReasonStep({ onBack, onClose, onContinue }: ReasonStepProps) {
   const hasValidImproveText = needsImproveText ? improveText.trim().length >= minImproveChars : true;
   const canContinue = Boolean(selected && hasValidPrice && hasValidImproveText);
 
-  const handleContinue = () => {
+  const handleContinue = async () => {
     if (!canContinue) {
       setShowError(true);
       return;
+    }
+    // Build payload
+    const payload: any = {
+      reason: selected,
+    };
+    if (needsImproveText) payload.reason_detail = improveText.trim();
+    if (needsPrice && price.trim()) {
+      const dollars = Number(price.trim());
+      if (!Number.isNaN(dollars)) payload.price_input_cents = Math.round(dollars * 100);
+    }
+
+    try {
+      await fetch('/api/cancellation/reason', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      await fetch('/api/cancellation/complete', { method: 'POST' });
+    } catch (e) {
+      // Non-blocking; still continue to Completed for demo purposes
     }
     onContinue();
   };

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 
 interface CompletedStepProps {
   onBack: () => void;
@@ -9,6 +9,23 @@ interface CompletedStepProps {
 }
 
 export function CompletedStep({ onBack, onClose, variant = 'no' }: CompletedStepProps) {
+  const [cancelAt, setCancelAt] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+    (async () => {
+      try {
+        const res = await fetch('/api/cancellation/status');
+        const json = await res.json();
+        if (active && res.ok) {
+          setCancelAt(json?.subscription?.cancel_at ?? null);
+        }
+      } catch {}
+    })();
+    return () => { active = false; };
+  }, []);
+
+  const formattedCancelAt = cancelAt ? new Date(cancelAt).toLocaleDateString(undefined, { year: 'numeric', month: 'long', day: 'numeric' }) : null;
   return (
     <div className="relative">
       {/* Mobile header */}
@@ -103,7 +120,7 @@ export function CompletedStep({ onBack, onClose, variant = 'no' }: CompletedStep
                 Thanks for being with us, and you’re always welcome back.
               </h3>
               <div className="text-sm text-gray-700 space-y-2 mb-6">
-                <p>Your subscription is set to end on XX date.</p>
+                <p>Your subscription is set to end on {formattedCancelAt ?? 'your end date'}.</p>
                 <p>You’ll still have full access until then. No further charges after that.</p>
                 <p className="mt-2">Changed your mind? You can reactivate anytime before your end date.</p>
               </div>

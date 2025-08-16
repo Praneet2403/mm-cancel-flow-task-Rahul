@@ -57,7 +57,23 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
             <CancellationStep1
               onClose={handleClose}
               onJobFound={handleJobFound}
-              onStillLooking={() => setCurrentStep('offer')}
+              onStillLooking={async () => {
+                // Start cancellation: assign/reuse variant and mark subscription pending_cancellation
+                try {
+                  const res = await fetch('/api/cancellation/start', { method: 'POST' });
+                  const json = await res.json();
+                  if (!res.ok) throw new Error(json.error || 'Failed to start');
+                  // Branch to Offer (B) or straight to Feedback (A)
+                  if (json.variant === 'B') {
+                    setCurrentStep('offer');
+                  } else {
+                    setCurrentStep('feedback');
+                  }
+                } catch (_) {
+                  // Fallback: continue without offer
+                  setCurrentStep('feedback');
+                }
+              }}
             />
           )}
 
@@ -65,8 +81,28 @@ export function CancellationModal({ isOpen, onClose }: CancellationModalProps) {
             <OfferStep
               onBack={() => setCurrentStep('initial')}
               onClose={handleClose}
-              onAccept={() => setCurrentStep('offerAccepted')}
-              onDecline={() => setCurrentStep('feedback')}
+              onAccept={async () => {
+                try {
+                  await fetch('/api/cancellation/offer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accepted: true }),
+                  });
+                } finally {
+                  setCurrentStep('offerAccepted');
+                }
+              }}
+              onDecline={async () => {
+                try {
+                  await fetch('/api/cancellation/offer', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ accepted: false }),
+                  });
+                } finally {
+                  setCurrentStep('feedback');
+                }
+              }}
             />
           )}
 
